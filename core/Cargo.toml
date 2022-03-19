@@ -8,6 +8,8 @@ version = "0.1.0"
 [dependencies]
 chrono = "0.4.18"
 data-encoding = "2.3.2"
+dotenv = "0.15.0"
 num-bigint = "0.4.3"
 serde = {version = "1.0.136", features = ["derive"]}
+sled = "0.34.7"
 utils = {path = "../utils"}

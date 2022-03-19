@@ -1,25 +1,25 @@
-use bincode::{self, ErrorKind};
+use bincode;
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
 use ring::digest::{Context, SHA256};
 use serde::{Deserialize, Serialize};
 
 /// 区块序列化
-pub fn serialized<T: ?Sized>(value: &T) -> Result<Vec<u8>, Box<ErrorKind>>
+pub fn serialized<T: ?Sized>(value: &T) -> Vec<u8>
 where
     T: Serialize,
 {
-    let serialized = bincode::serialize(value)?;
-    Ok(serialized)
+    let serialized = bincode::serialize(value).expect("序列化失败");
+    serialized
 }
 
 /// 从字节数组反序列化
-pub fn deserialized<'a, T>(bytes: &'a [u8]) -> Result<T, Box<ErrorKind>>
+pub fn deserialized<'a, T>(bytes: &'a [u8]) -> T
 where
     T: Deserialize<'a>,
 {
-    let deserialized = bincode::deserialize(bytes)?;
-    Ok(deserialized)
+    let deserialized = bincode::deserialize(bytes).expect("序列化失败");
+    deserialized
 }
 
 pub fn get_hash(value: &[u8]) -> String {

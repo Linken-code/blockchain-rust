@@ -1,7 +1,9 @@
 use crate::proof_of_work::ProofOfWork;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use sled::IVec;
 use utils::coder;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BlockHeader {
     timestamp: i64,   // 区块时间戳
@@ -20,8 +22,8 @@ pub struct Block {
 
 impl Block {
     // 新建一个区块
-    pub fn new_block(data: String, pre_hash: String) -> Result<Block, Box<dyn std::error::Error>> {
-        let transactions = coder::serialized(&data)?;
+    pub fn new_block(data: String, pre_hash: String) -> Block {
+        let transactions = coder::serialized(&data);
         let tx_hash: String = coder::get_hash(&transactions);
         let timestamp = Utc::now().timestamp();
         let mut block = Block {
@@ -39,11 +41,12 @@ impl Block {
         let (nonce, hash) = pow.run();
         block.nonce = nonce;
         block.hash = hash;
-        Ok(block)
+        block
     }
+
     //获取区块的hash
-    pub fn get_hash(&self) -> String {
-        self.hash.clone()
+    pub fn get_hash(&self) -> &str {
+        self.hash.as_str()
     }
 
     //获取上一个区块的hash
@@ -60,4 +63,11 @@ impl Block {
     // pub fn get_height(&self) -> usize {
     //     self.height
     // }
+}
+
+impl From<Block> for IVec {
+    fn from(b: Block) -> Self {
+        let bytes = coder::serialized(&b);
+        Self::from(bytes)
+    }
 }
