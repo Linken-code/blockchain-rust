@@ -1,0 +1,33 @@
+name: BlockChain
+version: '1.0'
+about: Learn use Rust Create Blockchain!
+author: Linken
+
+args:
+  - mode:
+      help: Target file you want to change
+      short: m
+      possible_values: [center, miner, wallet, send, balance, other]
+      takes_value: true
+  - parameters:
+      help: example option argument from yaml
+      short: p
+      long: params
+      multiple: true
+      takes_value: true
+      requires:
+        - mode
+
+subcommands:
+  - tx:
+      about: does testing things
+      args:
+        - check_list:
+            help: lists test values
+            short: l
+        - check_chain:
+            help: lists test values
+            short: c
+        - rest_utxo:
+            help: lists test values
+            short: r

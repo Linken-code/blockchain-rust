@@ -1,4 +1,5 @@
-use crate::proof_of_work::ProofOfWork;
+use crate::pow::ProofOfWork;
+use crate::transaction::Transaction;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sled::IVec;
@@ -13,31 +14,32 @@ pub struct BlockHeader {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Block {
-    header: BlockHeader,  //区块头部
-    hash: String,         // 当前区块的哈希值
-    transactions: String, // 交易数据
-    nonce: i64,           // 计数器
-                          // height: usize,        // 区块链中节点的高度
+    header: BlockHeader,            //区块头部
+    hash: String,                   // 当前区块的哈希值
+    transactions: Vec<Transaction>, // 交易数据
+    nonce: i64,                     // 计数器
+    height: usize,                  // 区块链中节点的高度
 }
 
 impl Block {
     // 新建一个区块
-    pub fn new_block(data: String, pre_hash: String) -> Block {
-        let transactions = coder::serialized(&data);
-        let tx_hash: String = coder::get_hash(&transactions);
+    pub fn new_block(transactions: &[Transaction], pre_hash: String, height: usize) -> Block {
         let timestamp = Utc::now().timestamp();
+        let tx_ser = coder::serialized(transactions);
+        let tx_hash = coder::get_hash(&tx_ser);
         let mut block = Block {
             header: BlockHeader {
                 timestamp,
-                tx_hash,
                 pre_hash,
+                tx_hash,
             },
             hash: String::new(),
-            transactions: data,
+            transactions: transactions.to_vec(),
             nonce: 0,
+            height,
         };
         // 挖矿计算哈希
-        let pow = ProofOfWork::new_proof_of_work(block.clone());
+        let mut pow = ProofOfWork::new_proof_of_work(block.clone());
         let (nonce, hash) = pow.run();
         block.nonce = nonce;
         block.hash = hash;
@@ -47,6 +49,13 @@ impl Block {
     //获取区块的hash
     pub fn get_hash(&self) -> &str {
         self.hash.as_str()
+    }
+
+    // 计算区块里所有交易的哈希
+    pub fn hash_transactions(&mut self) -> String {
+        let tx_ser = coder::serialized(&self.transactions);
+        self.header.tx_hash = coder::get_hash(&tx_ser);
+        self.header.tx_hash.clone()
     }
 
     //获取上一个区块的hash
@@ -59,10 +68,20 @@ impl Block {
         self.header.timestamp
     }
 
+    //获取交易数据
+    pub fn get_transactions(&self) -> &[Transaction] {
+        self.transactions.as_slice()
+    }
+
     //获取区块高度
-    // pub fn get_height(&self) -> usize {
-    //     self.height
-    // }
+    pub fn get_height(&self) -> usize {
+        self.height
+    }
+
+    //将hash转为字节数组
+    pub fn get_hash_bytes(&self) -> Vec<u8> {
+        self.hash.as_bytes().to_vec()
+    }
 }
 
 impl From<Block> for IVec {
