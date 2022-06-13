@@ -4,18 +4,22 @@ use cli::{cli_error_and_die, process, Cli};
 use env_logger::Env;
 use log::info;
 
-//命令：
-//新建钱包 cargo run -- -m wallet
-//新建区块链 cargo run -- -m center -p address
-//新建节点 cargo run -- -m miner
-//新增矿工地址 cargo run -- -m miner -p address
+///命令：
+///配置运行端口 cargo run -- -p port
 
-//向钱包地址发送币 cargo run -- -m send -p from to amount mine
+///新建钱包 cargo run -- new wallet
+///新建区块链 cargo run -- new center address
+///运行新节点 cargo run -- new miner
 
-//检查地址余额 cargo run -- -m balance -p address
-//查看钱包地址 cargo run -- -m other tx -l
-//查看区块链 cargo run -- -m other tx -c
-//重置utxo集 cargo run -- -m other tx -r
+///向钱包地址发送币 cargo run -- send  from to amount mine
+
+///新建矿工节点cargo run --  miner address
+///检查地址余额 cargo run -- wallet address
+///创建新区块链 cargo run -- center address
+
+///查看钱包地址 cargo run -- check wallet-list
+///查看区块链 cargo run -- check chain
+///重置utxo集 cargo run -- check utxo
 
 fn main() {
     // 注意，env_logger 必须尽可能早的初始化
